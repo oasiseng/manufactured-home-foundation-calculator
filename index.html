@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Manufactured Home Foundation Calculator per HUD Permanent Foundations Guide (HUD 7584). Estimate footing sizes, piers, tie-down spacing and materials for manufactured home foundations.">
+  <title>Manufactured Home Foundation Calculator – Oasis Engineering</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #333; background: #f9f9f9; margin: 0; }
+    .container { max-width: 600px; width: 95%; margin: 20px auto; background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+    h1 { text-align: center; color: #007BFF; font-size: 1.5em; margin: 0 0 10px; }
+    p.intro { text-align: center; margin: 0 0 20px; }
+    p.intro a { color: #007BFF; text-decoration: none; }
+    p.intro a:hover { text-decoration: underline; }
+    form label { display: block; margin: 8px 0 4px; font-weight: bold; position: relative; } /* Added for help icons */
+    form select, form input[type="checkbox"], form input[type="number"] { margin-right: 5px; }
+    form input[type="checkbox"] { transform: scale(1.2); vertical-align: middle; }
+    .form-group { margin-bottom: 10px; }
+    .help-icon { cursor: help; color: #007BFF; font-size: 0.9em; margin-left: 5px; } /* New: Tooltips */
+    button#calcButton { background: #007BFF; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 1em; }
+    button#calcButton:hover { background: #0056b3; }
+    #results { margin-top: 20px; }
+    #results h2 { font-size: 1.2em; color: #007BFF; margin-bottom: 5px; }
+    #results table { width: 100%; border-collapse: collapse; margin: 0 0 15px; } /* Changed ul to table for better structure */
+    #results th, #results td { padding: 8px; border: 1px solid #ddd; text-align: left; }
+    #results th { background: #f2f2f2; }
+    p.note { font-size: 0.9em; font-style: italic; }
+    footer p.disclaimer { font-size: 0.85em; color: #555; text-align: center; margin: 15px 0 0; }
+    .error { color: red; font-size: 0.9em; margin-top: 5px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Manufactured Home Foundation Calculator</h1>
+    <p class="intro">Use this tool by <a href="https://oasisengineering.com" target="_blank" rel="noopener">Oasis Engineering</a> to estimate foundation sizes and designs for HUD-compliant manufactured home foundations.</p>
+  </header>
+
+  <main class="container" id="calculator">
+    <!-- Foundation input form -->
+    <form id="foundationCalcForm">
+      <div class="form-group">
+        <label for="width">Home Width: <span class="help-icon" title="Overall width of the home in feet.">?</span></label>
+        <select id="width" aria-label="Select home width">
+          <option value="">Select Width</option>
+          <option value="12">12 ft</option>
+          <option value="14">14 ft</option> <!-- Added more options -->
+          <option value="16">16 ft</option>
+          <option value="18">18 ft</option>
+          <option value="20">20 ft</option>
+          <option value="24">24 ft</option>
+          <option value="28">28 ft</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="foundationType">Foundation Type: <span class="help-icon" title="Block: Masonry stacks on footings; Pier: Poured concrete cylinders.">?</span></label>
+        <select id="foundationType" aria-label="Select foundation type">
+          <option value="">Select Type</option>
+          <option value="block">Footing with Masonry Blocks</option>
+          <option value="pier">Cast-in-Place Piers</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="soilType">Soil Type (Bearing Capacity, psf): <span class="help-icon" title="Based on soil tests; higher capacity allows wider spacing.">?</span></label>
+        <select id="soilType" aria-label="Select soil type">
+          <option value="">Select Soil Type</option>
+          <option value="1500">Clay (weak, 1500 psf)</option>
+          <option value="2000">Sandy (medium, 2000 psf)</option>
+          <option value="2500">Loamy (firm, 2500 psf)</option>
+          <option value="3000">Gravel (strong, 3000 psf)</option> <!-- Added option -->
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="windZone">Wind Zone: <span class="help-icon" title="Per HUD map; affects tie-down density.">?</span></label>
+        <select id="windZone" aria-label="Select wind zone">
+          <option value="">Select Wind Zone</option>
+          <option value="I">Zone I – 110 mph</option>
+          <option value="II">Zone II – 120 mph</option>
+          <option value="III">Zone III – 130 mph</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="seismicZone">Seismic Zone: <span class="help-icon" title="Optional; reduces spacing in high-seismic areas per HUD.">?</span></label>
+        <select id="seismicZone" aria-label="Select seismic zone">
+          <option value="low">Low (No adjustment)</option>
+          <option value="medium">Medium (Reduce spacing by 1 ft)</option>
+          <option value="high">High (Reduce spacing by 2 ft)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="homeLength">Home Length (ft): <span class="help-icon" title="Overall length; min 10 ft, max 100 ft.">?</span></label>
+        <input type="number" id="homeLength" min="10" max="100" value="60" aria-label="Enter home length in feet">
+      </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="includeInspection"> Include Engineer Inspection Estimate ($450)
+        </label>
+      </div>
+      <button type="submit" id="calcButton">Calculate</button>
+      <p id="errorMessage" class="error" style="display:none;">Please fill all required fields correctly.</p>
+    </form>
+
+    <!-- Results section (initially empty) -->
+    <div id="results" style="display:none;">
+      <h2>Foundation Dimensions</h2>
+      <table>
+        <tr><th>Item</th><th>Value</th></tr>
+        <tr id="pierCountOutput"><td>Piers</td><td></td></tr>
+        <tr id="footingOutput"><td>Footings/Piers</td><td></td></tr>
+        <tr id="spacingOutput"><td>Spacing</td><td></td></tr>
+      </table>
+      <h2>Tie-Down Requirements</h2>
+      <table>
+        <tr><th>Item</th><th>Value</th></tr>
+        <tr id="tieDownCountOutput"><td>Anchors Required</td><td></td></tr>
+        <tr id="tieDownSpacingOutput"><td>Anchor Spacing</td><td></td></tr>
+        <tr id="tieDownTypeOutput"><td>Anchor Type</td><td></td></tr>
+      </table>
+      <h2>Estimated Material Cost</h2>
+      <table>
+        <tr><th>Item</th><th>Cost</th></tr>
+        <tr id="foundationCostOutput"><td>Foundation</td><td></td></tr>
+        <tr id="tieDownCostOutput"><td>Tie-Down Anchors</td><td></td></tr>
+        <tr id="inspectionCostOutput" style="display:none;"><td>Inspection</td><td></td></tr>
+        <tr id="totalCostOutput"><td>Total</td><td></td></tr>
+      </table>
+      <p class="note" id="complianceNote"></p>
+      <p class="note">Costs are material estimates only; labor and regional prices vary.</p>
+      <figure style="text-align:center; margin: 20px 0;">
+        <img src="https://oasisengineering.com/wp-content/uploads/2024/01/image.png" alt="Manufactured home cross-section with block piers and anchor strap, Src: PFGMH 4930.3G" style="max-width:100%; height:auto; border: 1px solid #ccc; border-radius: 4px;"> <!-- Fixed domain to .com -->
+        <figcaption style="font-size:0.85em; color:#555;">Manufactured home on masonry block pier foundations with steel strap ground anchors.</figcaption>
+      </figure>
+    </div>
+  </main>
+
+  <footer>
+    <p class="disclaimer">This calculator provides estimates based on HUD PFGMH guidelines (as of 2025). Actual designs must be verified by a licensed engineer. Oasis Engineering assumes no liability for use of this tool.</p>
+  </footer>
+
+  <script>
+    // Improved JS: Use event listener, const/let, modular functions, better validation
+    const form = document.getElementById('foundationCalcForm');
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      calculate();
+    });
+
+    function calculate() {
+      // Get input values
+      const widthFt = parseInt(document.getElementById('width').value);
+      const foundationType = document.getElementById('foundationType').value;
+      const soilCapacity = parseInt(document.getElementById('soilType').value);
+      const windZone = document.getElementById('windZone').value;
+      const seismicZone = document.getElementById('seismicZone').value;
+      const homeLengthFt = parseInt(document.getElementById('homeLength').value);
+      const includeInspection = document.getElementById('includeInspection').checked;
+
+      // Improved validation: Check numbers, ranges
+      if (isNaN(widthFt) || isNaN(soilCapacity) || isNaN(homeLengthFt) || !foundationType || !windZone || homeLengthFt < 10 || homeLengthFt > 100) {
+        document.getElementById('errorMessage').textContent = 'Please select all options and enter a valid length (10-100 ft).';
+        document.getElementById('errorMessage').style.display = 'block';
+        return;
+      } else {
+        document.getElementById('errorMessage').style.display = 'none';
+      }
+
+      // Constants for easier maintenance
+      const DESIGN_LOAD_PSF = 100; // Base; could add snow input later
+      const BLOCK_COST = 5;
+      const PIER_COST = 50;
+      const ANCHOR_COST = 30;
+      const INSPECTION_COST = 450;
+
+      // Determine pier lines (2 for single-wide <20ft, 3 for double-wide)
+      const pierLines = (widthFt >= 20) ? 3 : 2; // Adjusted threshold for more widths
+
+      // Pier spacing based on soil, adjusted for seismic
+      let pierSpacingFt = (soilCapacity <= 1500) ? 6 : (soilCapacity <= 2000) ? 7 : (soilCapacity <= 2500) ? 8 : 9; // Added for 3000 psf
+      if (seismicZone === 'medium') pierSpacingFt = Math.max(4, pierSpacingFt - 1); // Min 4ft safety
+      if (seismicZone === 'high') pierSpacingFt = Math.max(4, pierSpacingFt - 2);
+
+      const piersPerLine = Math.ceil(homeLengthFt / pierSpacingFt) + 1;
+      const totalPiers = piersPerLine * pierLines;
+      const totalBlocks = totalPiers * 4; // Approx blocks per stack
+
+      // Load calculations
+      const tribWidth = widthFt / pierLines;
+      const loadPerPier = tribWidth * pierSpacingFt * DESIGN_LOAD_PSF;
+      const requiredAreaSqFt = loadPerPier / soilCapacity;
+      const reqAreaSqIn = requiredAreaSqFt * 144;
+
+      // Improved footing size: Calculate exact and round up to next even inch (min 16)
+      let footingSizeIn = Math.ceil(Math.sqrt(reqAreaSqIn / 0.9)) + (Math.ceil(Math.sqrt(reqAreaSqIn / 0.9)) % 2); // Safety factor 0.9, even increments
+      footingSizeIn = Math.max(16, footingSizeIn); // Min 16in
+      const footingDimension = `${footingSizeIn}x${footingSizeIn} in`;
+      const footingThickness = '8 in';
+
+      // Pier diameter: Similar, round up
+      let pierDiameterIn = Math.ceil(2 * Math.sqrt(reqAreaSqIn / Math.PI)); // Diameter = 2 * sqrt(area / pi)
+      pierDiameterIn = Math.max(18, pierDiameterIn + (pierDiameterIn % 2)); // Min 18, even
+
+      // Tie-downs
+      const anchorSpacingFt = (windZone === 'III') ? 4 : (windZone === 'II') ? 6 : 8;
+      const anchorsPerSide = Math.ceil(homeLengthFt / anchorSpacingFt) + 1;
+      const totalAnchors = anchorsPerSide * 2;
+      const tieDownType = (windZone === 'I') ? 'Frame straps to ground anchors' : 'Frame, vertical (over-the-top), and longitudinal straps to ground anchors'; // Clarified
+
+      // Costs (with formatting)
+      const foundationCost = (foundationType === 'block') ? totalBlocks * BLOCK_COST : totalPiers * PIER_COST;
+      const tieDownCost = totalAnchors * ANCHOR_COST;
+      const inspectionCost = includeInspection ? INSPECTION_COST : 0;
+      const totalCost = foundationCost + tieDownCost + inspectionCost;
+
+      // Populate results (using table cells)
+      if (foundationType === 'block') {
+        document.querySelector('#pierCountOutput td:nth-child(2)').textContent = `${totalPiers} block stacks (approx. ${piersPerLine} per beam line)`;
+        document.querySelector('#footingOutput td:nth-child(2)').textContent = `${footingDimension} x ${footingThickness} each (concrete pads)`;
+        document.querySelector('#spacingOutput td:nth-child(2)').textContent = `~${pierSpacingFt} ft apart along beams (for ${homeLengthFt} ft home)`;
+      } else {
+        document.querySelector('#pierCountOutput td:nth-child(2)').textContent = `${totalPiers} cast-in-place (approx. ${piersPerLine} per line)`;
+        document.querySelector('#footingOutput td:nth-child(2)').textContent = `~${pierDiameterIn} in diameter (round concrete piers)`;
+        document.querySelector('#spacingOutput td:nth-child(2)').textContent = `~${pierSpacingFt} ft along home (for ${homeLengthFt} ft home)`;
+      }
+
+      document.querySelector('#tieDownCountOutput td:nth-child(2)').textContent = `${totalAnchors} total (${anchorsPerSide} per side)`;
+      document.querySelector('#tieDownSpacingOutput td:nth-child(2)').textContent = `~${anchorSpacingFt} ft on center along frame`;
+      document.querySelector('#tieDownTypeOutput td:nth-child(2)').textContent = tieDownType;
+
+      if (foundationType === 'block') {
+        document.querySelector('#foundationCostOutput td:nth-child(2)').textContent = `$${foundationCost.toLocaleString()} (approx. ${totalBlocks} blocks @ $${BLOCK_COST} each + footings)`;
+      } else {
+        document.querySelector('#foundationCostOutput td:nth-child(2)').textContent = `$${foundationCost.toLocaleString()} (${totalPiers} piers @ $${PIER_COST} each)`;
+      }
+      document.querySelector('#tieDownCostOutput td:nth-child(2)').textContent = `$${tieDownCost.toLocaleString()} (${totalAnchors} anchors @ $${ANCHOR_COST} each)`;
+      if (includeInspection) {
+        document.getElementById('inspectionCostOutput').style.display = 'table-row';
+        document.querySelector('#inspectionCostOutput td:nth-child(2)').innerHTML = '$450 – <a href="https://oasisengineering.com/manufactured-home-foundation-letter/" target="_blank" rel="noopener">Schedule at Oasis Engineering</a>';
+      } else {
+        document.getElementById('inspectionCostOutput').style.display = 'none';
+      }
+      document.querySelector('#totalCostOutput td:nth-child(2)').innerHTML = `<strong>$${totalCost.toLocaleString()}</strong>`;
+
+      // Compliance note
+      document.getElementById('complianceNote').innerHTML = 'This estimate aligns with HUD PFGMH (HUD 7584) standards. For a certified foundation design, <a href="https://oasisengineering.com/manufactured-home-foundation-letter/" target="_blank" rel="noopener">schedule a virtual inspection with Oasis Engineering</a>.';
+
+      // Show results
+      document.getElementById('results').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
