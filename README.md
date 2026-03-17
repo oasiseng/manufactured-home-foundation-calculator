@@ -75,6 +75,11 @@ Alternatively, download the ZIP and open the HTML file directly.
 - **Prescriptive Check:** Aligns with HUD guidelines for pier lines (2-3 based on width), minimum sizes, and anchor types.
 - **Limitations:** Assumes basic conditions; does not include snow loads, custom loads, or full engineering analysis. Maximum home length 100 ft.
 
+
+## Roadmap
+
+See [ROADMAP.md](ROADMAP.md) for planned improvements and recently shipped updates.
+
 ## Contributing
 
 Contributions are welcome! Please fork the repo and submit a pull request.
